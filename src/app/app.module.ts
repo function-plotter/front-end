@@ -7,10 +7,19 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { TreeContainerComponent } from './tree/tree-container/tree-container.component';
 import { TreeNodeComponent } from './tree/tree-node/tree-node.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AppComponent, TreeNodeComponent, TreeContainerComponent],
-  imports: [BrowserModule, AppRoutingModule, BrowserAnimationsModule, MatSelectModule, MatInputModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatInputModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })

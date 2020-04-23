@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TreeNode } from '../tree-node/tree-node.component';
 
 @Component({
   selector: 'app-tree-container',
@@ -8,6 +9,10 @@ import { Component, OnInit } from '@angular/core';
 export class TreeContainerComponent implements OnInit {
 
   constructor() { }
+
+  treeChange(node: TreeNode) {
+    console.log(node);
+  }
 
   ngOnInit(): void {
   }

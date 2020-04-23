@@ -1,26 +1,27 @@
 <div class="tree-node-container">
-  <div class="function-selector-container">
+  <form [formGroup]="group" class="function-selector-container">
     <div class="field-container">
       <mat-form-field>
         <mat-label>Function</mat-label>
-        <mat-select [(value)]="type">
+        <mat-select formControlName="type">
           <mat-option *ngFor="let function of availableTypes" [value]="function">
             {{ Functions[function].name }}</mat-option
           >
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="field-container" *ngIf="type === FunctionType.CONSTANT">
+    <div class="field-container" *ngIf="group.value.type === FunctionType.CONSTANT">
       <mat-form-field>
         <mat-label>Value</mat-label>
-        <input matInput type="number" [(value)]="constant" required />
+        <input matInput type="number" formControlName="constant" required />
       </mat-form-field>
     </div>
-  </div>
-  <div class="function-arguments-container" *ngIf="Functions[type]?.args">
+  </form>
+  <div class="function-arguments-container" *ngIf="Functions[group.value.type]?.args as args">
     <app-tree-node
-      *ngFor="let item of Array(Functions[type]?.args)"
+      *ngFor="let _ of Array(args); let i = index;"
       [exclude]="[FunctionType.INTEGRAL]"
+      (nodeChange)="argumentChange($event, i)"
     ></app-tree-node>
   </div>
 </div>
