@@ -1,0 +1,11 @@
+<div class="tree-node-container">
+  <div class="function-selector-container">
+    <mat-form-field>
+      <mat-label>Function</mat-label>
+      <mat-select [(value)]="type">
+        <mat-option *ngFor="let function of availableTypes" [value]="function"> {{ Functions[function].name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="function-arguments-container" *ngIf="type"></div>
+</div>
