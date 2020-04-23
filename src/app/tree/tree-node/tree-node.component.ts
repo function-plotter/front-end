@@ -7,13 +7,15 @@ import { FunctionType, Functions } from 'src/app/shared/models/Function';
   styleUrls: ['./tree-node.component.scss'],
 })
 export class TreeNodeComponent implements OnInit {
-  type: FunctionType;
+  type: FunctionType = FunctionType.VARIABLE;
+  constant = 1;
   accepts: FunctionType[] = [];
   exclude: FunctionType[] = [];
   availableTypes: FunctionType[] = [];
 
   // for template usage
   Functions = Functions;
+  FunctionType = FunctionType;
 
   constructor() {}
 
@@ -24,6 +26,5 @@ export class TreeNodeComponent implements OnInit {
       filtered[excludedFunction] = true;
     }
     this.availableTypes = available.filter((type) => !filtered[type]);
-    console.log(this.availableTypes);
   }
 }

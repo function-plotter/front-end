@@ -1,0 +1,20 @@
+.tree-node-container {
+  .function-selector-container {
+    display: flex;
+    align-items: center;
+
+    .field-container {
+      margin-left: 1em;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+
+  .function-arguments-container {
+    padding-left: 1em;
+    margin-left: 1em;
+    border-left: 1px solid darkblue;
+  }
+}
