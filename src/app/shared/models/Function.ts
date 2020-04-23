@@ -1,34 +1,54 @@
 export enum FunctionType {
-  INTEGRAL = 'integral',
-  ADDITION = 'add',
-  MULTIPLICATION = 'mult',
   VARIABLE = 'var',
   CONSTANT = 'const',
+  ADDITION = 'add',
+  MULTIPLICATION = 'mult',
+  DIVISION = 'div',
+  SIN = 'sin',
+  COS = 'cos',
+  POW = 'pow',
+  INTEGRAL = 'integral',
 }
 
 export interface FunctionData {
   name: string;
-  args: { accepts?: FunctionType[]; exclude?: FunctionType[] }[];
+  args: number;
 }
 export const Functions: { [key in FunctionType]: FunctionData } = {
   [FunctionType.INTEGRAL]: {
-    name: 'Integral',
-    args: [{ exclude: [FunctionType.INTEGRAL] }],
+    name: 'integral',
+    args: 1,
   },
   [FunctionType.ADDITION]: {
-    name: 'Addition',
-    args: [{ exclude: [FunctionType.INTEGRAL] }, { exclude: [FunctionType.INTEGRAL] }],
+    name: '+',
+    args: 2,
   },
   [FunctionType.MULTIPLICATION]: {
-    name: 'Multiplication',
-    args: [{ exclude: [FunctionType.INTEGRAL] }, { exclude: [FunctionType.INTEGRAL] }],
+    name: '*',
+    args: 2,
+  },
+  [FunctionType.DIVISION]: {
+    name: '/',
+    args: 2,
+  },
+  [FunctionType.SIN]: {
+    name: 'sin',
+    args: 1,
+  },
+  [FunctionType.COS]: {
+    name: 'cos',
+    args: 1,
+  },
+  [FunctionType.POW]: {
+    name: 'pow',
+    args: 2,
   },
   [FunctionType.VARIABLE]: {
-    name: 'Variable',
-    args: [],
+    name: 'x (variable)',
+    args: 0,
   },
   [FunctionType.CONSTANT]: {
-    name: 'Constant',
-    args: [],
+    name: 'constant',
+    args: 0,
   },
 };

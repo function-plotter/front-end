@@ -13,11 +13,14 @@
     <div class="field-container" *ngIf="type === FunctionType.CONSTANT">
       <mat-form-field>
         <mat-label>Value</mat-label>
-        <input matInput type="number" />
+        <input matInput type="number" [(value)]="constant" required />
       </mat-form-field>
     </div>
   </div>
-  <div class="function-arguments-container" *ngIf="Functions[type]?.args.length">
-    <app-tree-node *ngFor="let item of Functions[type]?.args"></app-tree-node>
+  <div class="function-arguments-container" *ngIf="Functions[type]?.args">
+    <app-tree-node
+      *ngFor="let item of Array(Functions[type]?.args)"
+      [exclude]="[FunctionType.INTEGRAL]"
+    ></app-tree-node>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { FunctionType, Functions } from 'src/app/shared/models/Function';
 
 @Component({
@@ -9,22 +9,27 @@ import { FunctionType, Functions } from 'src/app/shared/models/Function';
 export class TreeNodeComponent implements OnInit {
   type: FunctionType = FunctionType.VARIABLE;
   constant = 1;
-  accepts: FunctionType[] = [];
-  exclude: FunctionType[] = [];
+  @Input() accepts: FunctionType[] = [];
+  @Input() exclude: FunctionType[] = [];
   availableTypes: FunctionType[] = [];
 
   // for template usage
   Functions = Functions;
   FunctionType = FunctionType;
+  Array = Array;
 
   constructor() {}
 
-  ngOnInit(): void {
-    const available = this.accepts.length ? this.accepts : (Object.values(FunctionType) as FunctionType[]);
+  private getAvailableTypes(accepts: FunctionType[], exclude: FunctionType[]) {
+    const available = accepts.length ? accepts : (Object.values(FunctionType) as FunctionType[]);
     const filtered = {};
-    for (const excludedFunction of this.exclude) {
+    for (const excludedFunction of exclude) {
       filtered[excludedFunction] = true;
     }
-    this.availableTypes = available.filter((type) => !filtered[type]);
+    return available.filter((type) => !filtered[type]);
+  }
+
+  ngOnInit(): void {
+    this.availableTypes = this.getAvailableTypes(this.accepts, this.exclude);
   }
 }
