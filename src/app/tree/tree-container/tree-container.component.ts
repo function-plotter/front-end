@@ -11,7 +11,7 @@ export class TreeContainerComponent implements OnInit {
   constructor() { }
 
   treeChange(node: TreeNode) {
-    console.log(node);
+    console.log(JSON.stringify(node));
   }
 
   ngOnInit(): void {

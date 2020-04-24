@@ -6,6 +6,10 @@
     .field-container {
       margin-left: 1em;
 
+      mat-form-field {
+        width: 7em;
+      }
+
       &:first-child {
         margin-left: 0;
       }
