@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FunctionType, Functions } from 'src/app/shared/models/Function';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -17,10 +17,12 @@ export const DEFAULT_NODE: TreeNode = {
   selector: 'app-tree-node',
   templateUrl: './tree-node.component.html',
   styleUrls: ['./tree-node.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TreeNodeComponent implements OnInit, OnDestroy {
   @Input() accepts: FunctionType[] = [];
   @Input() exclude: FunctionType[] = [];
+  @Input() node: TreeNode = DEFAULT_NODE;
 
   // emit new subtree changes
   @Output() nodeChange: EventEmitter<TreeNode> = new EventEmitter<TreeNode>();
@@ -29,7 +31,6 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
   availableTypes: FunctionType[] = [];
 
   // store a representation of the subtree which has its root in this node
-  nodeRepresentation: TreeNode = DEFAULT_NODE;
 
   // for template usage
   Functions = Functions;
@@ -58,7 +59,14 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
     // if this function type supports arguments, compute a list
     // of default tree nodes representing the arguments
     if (Functions[type].args) {
-      node.args = Array(Functions[type].args).fill(DEFAULT_NODE);
+      node.args = [];
+      // Note that Array.prototype.fill does not work in this case
+      // as every argument needs to have a different object reference
+      // otherwise the first change (from within the child tree-node component)
+      // will actually modify all arguments
+      for (let i = 0; i < Functions[type].args; i++) {
+        node.args.push(Object.assign({}, DEFAULT_NODE));
+      }
     }
 
     // if the function type is constant, set the value to the node representation
@@ -66,28 +74,38 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
       node.value = this.group.value.constant;
     }
 
-    this.nodeRepresentation = node;
+    this.node = node;
     this.nodeChange.emit(node);
   }
 
   argumentChange(node: TreeNode, index: number) {
-    this.nodeRepresentation.args[index] = node;
-    this.nodeChange.emit(this.nodeRepresentation);
+    // we need to construct a new object (with new reference)
+    // because the change strategy is `OnPush` which will only detect reference changes
+    const args = this.node.args;
+    args[index] = node;
+    this.node = Object.assign({}, this.node, { args });
+    this.nodeChange.emit(this.node);
   }
 
   constantChange(value: number) {
-    this.nodeRepresentation.value = value;
-    this.nodeChange.emit(this.nodeRepresentation);
+    // see `argumentChange` on why Object.assign
+    this.node = Object.assign({}, this.node, { value });
+    this.nodeChange.emit(this.node);
   }
 
   ngOnInit(): void {
+    // init the basic form group
     this.group = new FormGroup({
-      type: new FormControl(DEFAULT_NODE.type),
+      type: new FormControl(this.node.type),
       constant: new FormControl(1),
     });
 
+    // handle type changes when user select different function types
     this.typeSubscription = this.group.controls.type.valueChanges.subscribe((type) => this.typeChange(type));
+    // handle constant value changes
+    // this will only trigger when FunctionType.COSNTANT is selected
     this.constSubscription = this.group.controls.constant.valueChanges.subscribe((value) => this.constantChange(value));
+    // init the list of available function types that the user can choose from
     this.availableTypes = this.getAvailableTypes(this.accepts, this.exclude);
   }
 

@@ -17,10 +17,11 @@
       </mat-form-field>
     </div>
   </form>
-  <div class="function-arguments-container" *ngIf="Functions[group.value.type]?.args as args">
+  <div class="function-arguments-container" *ngIf="node.args as args">
     <app-tree-node
-      *ngFor="let _ of Array(args); let i = index;"
+      *ngFor="let argNode of args; let i = index"
       [exclude]="[FunctionType.INTEGRAL]"
+      [node]="argNode"
       (nodeChange)="argumentChange($event, i)"
     ></app-tree-node>
   </div>
