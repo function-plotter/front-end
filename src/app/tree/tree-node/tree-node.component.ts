@@ -88,6 +88,9 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
   }
 
   constantChange(value: number) {
+    if (!value || value === this.node.value) {
+      return;
+    }
     // see `argumentChange` on why Object.assign
     this.node = Object.assign({}, this.node, { value });
     this.nodeChange.emit(this.node);
@@ -97,7 +100,7 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
     // init the basic form group
     this.group = new FormGroup({
       type: new FormControl(this.node.type),
-      constant: new FormControl(1),
+      constant: new FormControl(this.node.value || 1),
     });
 
     // handle type changes when user select different function types
