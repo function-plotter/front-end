@@ -1,0 +1,19 @@
+.input-container {
+  padding: 1em;
+
+  .fields-container {
+    display: flex;
+
+    .field-container {
+      margin-left: 1em;
+
+      .mat-form-field {
+        width: 5em;
+      }
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+}

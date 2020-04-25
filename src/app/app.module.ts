@@ -8,10 +8,11 @@ import { AppComponent } from './app.component';
 import { TreeContainerComponent } from './tree/tree-container/tree-container.component';
 import { TreeNodeComponent } from './tree/tree-node/tree-node.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { InputComponent } from './input/input.component';
 import { GraphicComponent } from './graphic/graphic.component';
 
 @NgModule({
-  declarations: [AppComponent, TreeNodeComponent, TreeContainerComponent, GraphicComponent],
+  declarations: [AppComponent, TreeNodeComponent, TreeContainerComponent, InputComponent, GraphicComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
