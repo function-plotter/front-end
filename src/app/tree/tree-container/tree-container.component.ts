@@ -1,20 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { TreeNode } from '../tree-node/tree-node.component';
 
 @Component({
   selector: 'app-tree-container',
   templateUrl: './tree-container.component.html',
-  styleUrls: ['./tree-container.component.scss']
+  styleUrls: ['./tree-container.component.scss'],
 })
 export class TreeContainerComponent implements OnInit {
-
-  constructor() { }
+  @Output() functionChange = new EventEmitter<TreeNode>();
+  constructor() {}
 
   treeChange(node: TreeNode) {
-    console.log(JSON.stringify(node));
+    this.functionChange.emit(node);
   }
 
-  ngOnInit(): void {
-  }
-
+  ngOnInit(): void {}
 }
