@@ -7,7 +7,7 @@ export interface VariableRange {
   step: number;
 }
 
-const DEFAULT_RANGE: VariableRange = {
+export const DEFAULT_RANGE: VariableRange = {
   lowerBound: 0,
   upperBound: 1,
   step: 0.1,
@@ -74,8 +74,7 @@ export class InputComponent implements OnInit {
       this.rangeSnapshot = newRange;
       this.rangeChange.emit(newRange);
     });
-    // set default range using `setValue` and not as init param
-    // so the we can emit the initial values
+    // set the default value for the form group
     this.group.setValue(DEFAULT_RANGE);
   }
 }
