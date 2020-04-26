@@ -8,9 +8,9 @@ export interface VariableRange {
 }
 
 export const DEFAULT_RANGE: VariableRange = {
-  lowerBound: 0,
-  upperBound: 1,
-  step: 0.1,
+  lowerBound: -5,
+  upperBound: 5,
+  step: 1,
 };
 
 @Component({

@@ -1,0 +1,20 @@
+.app-container {
+  display: flex;
+  justify-content: space-evenly;
+  height: 100%;
+  .column {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    height: auto;
+    max-height: 100%;
+    overflow-y: auto;
+
+    &.input-column {
+      justify-content: flex-start;
+      align-items: flex-start;
+      flex-direction: column;
+      padding-top: 3em;
+    }
+  }
+}
