@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Solution } from '../models/Solution';
 import { TreeNode } from 'src/app/tree/tree-node/tree-node.component';
-import { VariableRange } from 'src/app/input/input.component';
+import { VariableRange, DEFAULT_RANGE } from 'src/app/input/input.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -33,13 +33,19 @@ export class SolverService {
         range,
         function: func,
       })
-      .subscribe((response: Solution) => {
-        console.log(`solution`, response);
-        if (response.length) {
-          this.solution.emit(response);
-        } else {
+      .subscribe(
+        (response: Solution) => {
+          console.log(`solution`, response);
+          if (response.length) {
+            this.solution.emit(response);
+          } else {
+            this.solution.emit(DEFAULT_SOLUTION);
+          }
+        },
+        (err) => {
+          console.error(err);
           this.solution.emit(DEFAULT_SOLUTION);
-        }
-      });
+        },
+      );
   }
 }

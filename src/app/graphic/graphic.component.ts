@@ -103,7 +103,6 @@ export class GraphicComponent implements OnInit {
 
     // compute min and max x and y
     this.maxX = this.minX = solution[0].x;
-    this.maxY = this.minY = solution[0].y;
     for (const coordinate of solution) {
       if (coordinate.x > this.maxX) {
         this.maxX = coordinate.x;
@@ -111,18 +110,12 @@ export class GraphicComponent implements OnInit {
       if (coordinate.x < this.minX) {
         this.minX = coordinate.x;
       }
-      if (coordinate.y > this.maxY) {
-        this.maxY = coordinate.y;
-      }
-      if (coordinate.y < this.minY) {
-        this.minY = coordinate.y;
-      }
     }
     // extend by 1 point the guidelines
     this.maxX++;
-    this.maxY++;
-    this.minY--;
+    this.maxY = (this.maxX * this.height) / this.width;
     this.minX--;
+    this.minY = (this.minX * this.height) / this.width;
 
     this.createGraphic(ctx);
     this.renderFunction(ctx, solution);
@@ -131,7 +124,7 @@ export class GraphicComponent implements OnInit {
   private createGraphic(ctx: CanvasRenderingContext2D): void {
     // +Y axis
     ctx.save();
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1;
     this.drawAx(ctx, 0, this.maxY);
 
     // -Y axis
@@ -188,7 +181,6 @@ export class GraphicComponent implements OnInit {
     });
     ctx.stroke();
     ctx.strokeStyle = GUIDELINES_COLOR;
-    console.log('rendered function');
   }
 
   private drawXTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
@@ -199,10 +191,10 @@ export class GraphicComponent implements OnInit {
   }
 
   private XC(x: number): number {
-    return ((x - this.MinX) / (this.MaxX - this.MinX)) * this.width;
+    return ((x - this.minX) / (this.maxX - this.minX)) * this.width;
   }
 
   private YC(y: number): number {
-    return this.height - ((y - this.MinY) / (this.MaxY - this.MinY)) * this.height;
+    return this.height - ((y - this.minY) / (this.maxY - this.MinY)) * this.height;
   }
 }
