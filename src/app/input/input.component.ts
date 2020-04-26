@@ -46,7 +46,7 @@ export class InputComponent implements OnInit {
     const min = group.get('lowerBound');
     const max = group.get('upperBound');
     const step = group.get('step');
-    if (step.value > max.value - min.value) {
+    if (!step.value || step.value <= 0 || step.value > max.value - min.value) {
       return { invalidStep: true };
     }
     return null;
