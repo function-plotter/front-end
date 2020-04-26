@@ -5,6 +5,8 @@ import { Solution, Coordinate } from '../shared/models/Solution';
 
 const GUIDELINES_COLOR = '#555';
 const GRAPH_COLOR = '#673ab7';
+const GRAPH_FILENAME = 'graph.png';
+const INITIAL_SCALE = 1.0;
 
 @Component({
   selector: 'app-graphic',
@@ -15,6 +17,9 @@ export class GraphicComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   width = 500;
   height = 500;
+  scale = 1.0;
+  scaleMultiplier = 0.01;
+  lastSolution: Solution;
 
   private maxX: number;
   private maxY: number;
@@ -52,10 +57,48 @@ export class GraphicComponent implements OnInit {
     this.solver.solution.subscribe((solution: Solution) => this.handleSolutionChange(ctx, solution));
   }
 
-  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[]) {
+  downloadGraph(): void {
+    let link = document.createElement('a');
+    link.download = GRAPH_FILENAME;
+    link.href = this.canvas.nativeElement.toDataURL();
+    link.click();
+  }
+
+  zoomIn(): void {
+    if(this.scale < INITIAL_SCALE){
+      this.scale = INITIAL_SCALE;
+    }
+    this.scale += this.scaleMultiplier;
+    this.zoomGraph();
+  }
+
+  zoomOut(): void {
+    if(this.scale > INITIAL_SCALE){
+      this.scale = INITIAL_SCALE;
+    }
+    this.scale -= this.scaleMultiplier;
+    this.zoomGraph();
+  }
+
+  private zoomGraph(): void {
+    const newWidth = this.width * this.scale;
+    const newHeight = this.height * this.scale;
+    const canvas = this.canvas.nativeElement;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    ctx.save();
+    ctx.translate(-((newWidth-this.width)/2),-((newHeight-this.height)/2));
+    ctx.scale(this.scale, this.scale);
+    this.createGraphic(ctx);
+    this.renderFunction(ctx, this.lastSolution);
+  }
+
+  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[]): void {
     if (!solution.length) {
       return;
     }
+    this.lastSolution = solution;
     ctx.clearRect(0, 0, this.width, this.height);
 
     // compute min and max x and y

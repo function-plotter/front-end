@@ -11,6 +11,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputComponent } from './input/input.component';
 import { GraphicComponent } from './graphic/graphic.component';
 import { HttpClientModule } from '@angular/common/http';
+import { MatButtonModule } from '@angular/material/button'
 
 @NgModule({
   declarations: [AppComponent, TreeNodeComponent, TreeContainerComponent, InputComponent, GraphicComponent],
@@ -23,6 +24,7 @@ import { HttpClientModule } from '@angular/common/http';
     MatSelectModule,
     MatInputModule,
     HttpClientModule,
+    MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://function-plotter.herokuapp.com/solve',
+  //apiUrl: 'https://function-plotter.herokuapp.com/solve',
+  apiUrl: 'https://localhost:44321/solve'
 };
 
 /*
