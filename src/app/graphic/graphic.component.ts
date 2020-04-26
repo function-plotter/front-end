@@ -1,16 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Coordinates } from '../shared/models/graphic.model';
+import { SolverService } from '../shared/services/solver.service';
+import { Solution, Coordinate } from '../shared/models/Solution';
+
+const GUIDELINES_COLOR = '#555';
+const GRAPH_COLOR = '#673ab7';
+const GRAPH_FILENAME = 'graph.png';
+const INITIAL_SCALE = 1.0;
 
 @Component({
   selector: 'app-graphic',
   templateUrl: './graphic.component.html',
-  styleUrls: ['./graphic.component.scss']
+  styleUrls: ['./graphic.component.scss'],
 })
 export class GraphicComponent implements OnInit {
-
-  coordinates = [{x:-6, y:6}, {x:2, y:8}, {x:3, y:8}, {x:2.3, y:9.32}];
+  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   width = 500;
   height = 500;
+  scale = 1.0;
+  scaleMultiplier = 0.01;
+  lastSolution: Solution;
+
+  private maxX: number;
+  private maxY: number;
+  private minX: number;
+  private minY: number;
 
   get MaxX(): number {
     return 10;
@@ -21,73 +35,144 @@ export class GraphicComponent implements OnInit {
   }
 
   get MaxY(): number {
-    return this.MaxX * this.height/this.width;
+    return (this.MaxX * this.height) / this.width;
   }
 
   get MinY(): number {
-    return this.MinX * this.height/this.width;
+    return (this.MinX * this.height) / this.width;
   }
 
-  constructor() { }
+  constructor(private solver: SolverService) {}
 
   ngOnInit(): void {
-    const canvas = document.getElementById('graphic') as HTMLCanvasElement;
+    // init the canvas
+    const canvas = this.canvas.nativeElement;
+    canvas.width = this.width;
+    canvas.height = this.height;
+
+    // create the guidelines
     const ctx = canvas.getContext('2d');
     this.createGraphic(ctx);
-    this.renderFunction(ctx);
+
+    this.solver.solution.subscribe((solution: Solution) => this.handleSolutionChange(ctx, solution));
+  }
+
+  downloadGraph(): void {
+    let link = document.createElement('a');
+    link.download = GRAPH_FILENAME;
+    link.href = this.canvas.nativeElement.toDataURL();
+    link.click();
+  }
+
+  zoomIn(): void {
+    if(this.scale < INITIAL_SCALE){
+      this.scale = INITIAL_SCALE;
+    }
+    this.scale += this.scaleMultiplier;
+    this.zoomGraph();
+  }
+
+  zoomOut(): void {
+    if(this.scale > INITIAL_SCALE){
+      this.scale = INITIAL_SCALE;
+    }
+    this.scale -= this.scaleMultiplier;
+    this.zoomGraph();
+  }
+
+  private zoomGraph(): void {
+    const newWidth = this.width * this.scale;
+    const newHeight = this.height * this.scale;
+    const canvas = this.canvas.nativeElement;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    ctx.save();
+    ctx.translate(-((newWidth-this.width)/2),-((newHeight-this.height)/2));
+    ctx.scale(this.scale, this.scale);
+    this.createGraphic(ctx);
+    this.renderFunction(ctx, this.lastSolution);
+  }
+
+  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[]): void {
+    if (!solution.length) {
+      return;
+    }
+    this.lastSolution = solution;
+    ctx.clearRect(0, 0, this.width, this.height);
+
+    // compute min and max x and y
+    this.maxX = this.minX = solution[0].x;
+    for (const coordinate of solution) {
+      if (coordinate.x > this.maxX) {
+        this.maxX = coordinate.x;
+      }
+      if (coordinate.x < this.minX) {
+        this.minX = coordinate.x;
+      }
+    }
+    // extend by 1 point the guidelines
+    this.maxX++;
+    this.maxY = (this.maxX * this.height) / this.width;
+    this.minX--;
+    this.minY = (this.minX * this.height) / this.width;
+
+    this.createGraphic(ctx);
+    this.renderFunction(ctx, solution);
   }
 
   private createGraphic(ctx: CanvasRenderingContext2D): void {
     // +Y axis
     ctx.save();
-    ctx.lineWidth = 2;
-    this.drawAx(ctx, 0, this.MaxY);
+    ctx.lineWidth = 1;
+    this.drawAx(ctx, 0, this.maxY);
 
     // -Y axis
-    this.drawAx(ctx, 0, this.MinY);
+    this.drawAx(ctx, 0, this.minY);
 
     // +X axis
-    this.drawAx(ctx, this.MaxX, 0);
+    this.drawAx(ctx, this.maxX, 0);
 
     // -X axis
-    this.drawAx(ctx, this.MinX, 0);
-    
-    for(let i=1; i < this.MaxY; i++) {
+    this.drawAx(ctx, this.minX, 0);
+
+    for (let i = 1; i < this.maxY; i++) {
       this.drawYTickMarks(ctx, 0, i);
     }
 
-    for(let i=1; i > this.MinY; i--) {
+    for (let i = 1; i > this.minY; i--) {
       this.drawYTickMarks(ctx, 0, i);
     }
 
-    for(let i=1; i < this.MaxX; i++) {
+    for (let i = 1; i < this.maxX; i++) {
       this.drawXTickMarks(ctx, i, 0);
     }
 
-    for(let i=1; i > this.MinX; i--) {
+    for (let i = 1; i > this.minX; i--) {
       this.drawXTickMarks(ctx, i, 0);
     }
     ctx.restore();
   }
 
-  private drawAx(ctx:CanvasRenderingContext2D, XC: number, YC: number): void {
+  private drawAx(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(0), this.YC(0));
     ctx.lineTo(this.XC(XC), this.YC(YC));
     ctx.stroke();
   }
 
-  private drawYTickMarks(ctx:CanvasRenderingContext2D, XC: number, YC: number): void {
+  private drawYTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(XC) - 5, this.YC(YC));
     ctx.lineTo(this.XC(XC) + 5, this.YC(YC));
     ctx.stroke();
   }
 
-  private renderFunction(ctx:CanvasRenderingContext2D): void {
+  private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[]): void {
     let firstPoint = true;
-    this.coordinates.forEach((c: Coordinates) => {
-      if(firstPoint) {
+    ctx.strokeStyle = GRAPH_COLOR;
+    coordinates.forEach((c: Coordinates) => {
+      if (firstPoint) {
         ctx.moveTo(this.XC(c.x), this.YC(c.y));
         firstPoint = false;
       } else {
@@ -95,9 +180,10 @@ export class GraphicComponent implements OnInit {
       }
     });
     ctx.stroke();
+    ctx.strokeStyle = GUIDELINES_COLOR;
   }
 
-  private drawXTickMarks(ctx:CanvasRenderingContext2D, XC: number, YC: number): void {
+  private drawXTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(XC), this.YC(YC) - 5);
     ctx.lineTo(this.XC(XC), this.YC(YC) + 5);
@@ -105,11 +191,10 @@ export class GraphicComponent implements OnInit {
   }
 
   private XC(x: number): number {
-    return (x - this.MinX) / (this.MaxX - this.MinX) * this.width;
+    return ((x - this.minX) / (this.maxX - this.minX)) * this.width;
   }
 
   private YC(y: number): number {
-    return this.height - (y - this.MinY) / (this.MaxY - this.MinY) * this.height;
+    return this.height - ((y - this.minY) / (this.maxY - this.MinY)) * this.height;
   }
-
 }

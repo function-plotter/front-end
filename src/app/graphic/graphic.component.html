@@ -1,1 +1,6 @@
-<canvas class="graphic" id="graphic" width="500" height="500"></canvas>
+<canvas #canvas class="graphic"></canvas>
+<div class="buttons">
+    <button mat-raised-button (click)="zoomIn()">+</button>
+    <button mat-raised-button (click)="zoomOut()">-</button>
+    <button mat-raised-button (click)="downloadGraph()">Download</button>
+</div>

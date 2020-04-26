@@ -1,3 +1,9 @@
-<app-input (rangeChange)="onRangeChange($event)"></app-input>
-<app-tree-container (functionChange)="onFunctionChange($event)"></app-tree-container>
-<router-outlet></router-outlet>
+<div class="app-container">
+  <div class="column input-column">
+    <app-input (rangeChange)="onRangeChange($event)"></app-input>
+    <app-tree-container (functionChange)="onFunctionChange($event)"></app-tree-container>
+  </div>
+  <div class="column">
+    <app-graphic></app-graphic>
+  </div>
+</div>
