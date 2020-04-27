@@ -45,11 +45,15 @@ export class GraphicComponent implements OnInit {
     this.solver.solution.subscribe((solution: Solution) => this.handleSolutionChange(ctx, solution));
   }
 
-  downloadGraph(): void {
+  downloadPNG(): void {
     const link = document.createElement('a');
     link.download = GRAPH_FILENAME;
     link.href = this.canvas.nativeElement.toDataURL();
     link.click();
+  }
+
+  downloadCSV(): void {
+
   }
 
   zoomIn(): void {
@@ -87,7 +91,7 @@ export class GraphicComponent implements OnInit {
       return;
     }
     this.lastSolution = solution;
-    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.clearRect(0, 0, this.width / this.virtualScale, this.height / this.virtualScale);
 
     // compute min and max x and y
     this.maxX = this.minX = solution[0].x;
@@ -112,7 +116,7 @@ export class GraphicComponent implements OnInit {
   private createGraphic(ctx: CanvasRenderingContext2D): void {
     // +Y axis
     ctx.save();
-    ctx.lineWidth = 1 / Math.pow(this.virtualScale, 2);
+    ctx.lineWidth = 1.3 / this.virtualScale;
     this.drawAx(ctx, 0, this.maxY);
 
     // -Y axis
@@ -159,7 +163,7 @@ export class GraphicComponent implements OnInit {
   private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[]): void {
     let firstPoint = true;
     ctx.strokeStyle = GRAPH_COLOR;
-    ctx.lineWidth = 1.3 / this.virtualScale;
+    ctx.lineWidth = 1.5 / this.virtualScale;
     coordinates.forEach((c: Coordinates) => {
       if (firstPoint) {
         ctx.moveTo(this.XC(c.x), this.YC(c.y));

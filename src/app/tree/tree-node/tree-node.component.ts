@@ -1,10 +1,11 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FunctionType, Functions } from 'src/app/shared/models/Function';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 export interface TreeNode {
   type: FunctionType;
+  range?: [number, number];
   value?: number;
   args?: TreeNode[];
 }
@@ -38,8 +39,7 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
   Array = Array;
 
   group: FormGroup;
-  typeSubscription: Subscription;
-  constSubscription: Subscription;
+  subscription: Subscription = new Subscription();
 
   constructor() {}
 
@@ -73,6 +73,10 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
     if (type === FunctionType.CONSTANT) {
       node.value = this.group.value.constant;
     }
+    // if the function type is integral, set the range
+    if (type === FunctionType.INTEGRAL) {
+      node.range = [this.group.value.range.a, this.group.value.range.b];
+    }
 
     this.node = node;
     this.nodeChange.emit(node);
@@ -96,24 +100,44 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
     this.nodeChange.emit(this.node);
   }
 
+  integralRangeChange(value: { a: number; b: number }) {
+    if (this.group.controls.range.errors) {
+      return;
+    }
+    this.node = Object.assign({}, this.node, { range: [value.a, value.b] });
+    this.nodeChange.emit(this.node);
+  }
+
   ngOnInit(): void {
     // init the basic form group
     this.group = new FormGroup({
       type: new FormControl(this.node.type),
-      constant: new FormControl(this.node.value || 1),
+      constant: new FormControl(this.node.value || 1, Validators.required),
+      range: new FormGroup(
+        {
+          a: new FormControl(this.node.range ? this.node.range[0] : 1),
+          b: new FormControl(this.node.range ? this.node.range[1] : 2),
+        },
+        (group: FormGroup) => {
+          const a = group.controls.a.value;
+          const b = group.controls.b.value;
+          return a === null || b === null || a >= b ? { invalidRange: true } : null;
+        },
+      ),
     });
 
     // handle type changes when user select different function types
-    this.typeSubscription = this.group.controls.type.valueChanges.subscribe((type) => this.typeChange(type));
+    this.subscription.add(this.group.controls.type.valueChanges.subscribe((type) => this.typeChange(type)));
     // handle constant value changes
     // this will only trigger when FunctionType.COSNTANT is selected
-    this.constSubscription = this.group.controls.constant.valueChanges.subscribe((value) => this.constantChange(value));
+    this.subscription.add(this.group.controls.constant.valueChanges.subscribe((value) => this.constantChange(value)));
+    // handle integral range change
+    this.subscription.add(this.group.controls.range.valueChanges.subscribe((value) => this.integralRangeChange(value)));
     // init the list of available function types that the user can choose from
     this.availableTypes = this.getAvailableTypes(this.accepts, this.exclude);
   }
 
   ngOnDestroy(): void {
-    this.typeSubscription.unsubscribe();
-    this.constSubscription.unsubscribe();
+    this.subscription.unsubscribe();
   }
 }
