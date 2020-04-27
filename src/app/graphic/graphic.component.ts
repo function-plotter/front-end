@@ -2,9 +2,12 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Coordinates } from '../shared/models/graphic.model';
 import { SolverService } from '../shared/services/solver.service';
 import { Solution, Coordinate } from '../shared/models/Solution';
+import { TreeNode } from '../tree/tree-node/tree-node.component';
+import { FunctionType } from '../shared/models/Function';
 
 const GUIDELINES_COLOR = '#555';
 const GRAPH_COLOR = '#673ab7';
+const FILL_COLOR = '#ffeeff';
 const GRAPH_FILENAME = 'graph.png';
 const INITIAL_SCALE = 1.0;
 
@@ -21,6 +24,7 @@ export class GraphicComponent implements OnInit {
   virtualScale = INITIAL_SCALE;
   scaleMultiplier = 0.1;
   lastSolution: Solution;
+  lastFunc: TreeNode;
 
   private maxX: number;
   private maxY: number;
@@ -42,7 +46,9 @@ export class GraphicComponent implements OnInit {
     const ctx = canvas.getContext('2d');
     this.createGraphic(ctx);
 
-    this.solver.solution.subscribe((solution: Solution) => this.handleSolutionChange(ctx, solution));
+    this.solver.solution.subscribe(({ func, solution }: { func: TreeNode; solution: Solution }) =>
+      this.handleSolutionChange(ctx, solution, func),
+    );
   }
 
   downloadPNG(): void {
@@ -52,9 +58,7 @@ export class GraphicComponent implements OnInit {
     link.click();
   }
 
-  downloadCSV(): void {
-
-  }
+  downloadCSV(): void {}
 
   zoomIn(): void {
     if (this.virtualScale < this.maxScale) {
@@ -86,11 +90,12 @@ export class GraphicComponent implements OnInit {
     this.renderFunction(ctx, this.lastSolution);
   }
 
-  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[]): void {
+  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[], func: TreeNode): void {
     if (!solution.length) {
       return;
     }
     this.lastSolution = solution;
+    this.lastFunc = func;
     ctx.clearRect(0, 0, this.width / this.virtualScale, this.height / this.virtualScale);
 
     // compute min and max x and y
@@ -160,10 +165,33 @@ export class GraphicComponent implements OnInit {
     ctx.stroke();
   }
 
-  private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[]): void {
+  private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[] = []): void {
+    if (!coordinates.length) {
+      return;
+    }
+
+    if (this.lastFunc.type === FunctionType.INTEGRAL) {
+      ctx.save();
+      const aCoordinate = coordinates.findIndex(({ x }) => x === this.lastFunc.range[0]);
+      const bCoordinate = coordinates.findIndex(({ x }) => x === this.lastFunc.range[1]);
+      ctx.beginPath();
+      ctx.moveTo(this.XC(coordinates[aCoordinate].x), this.YC(0));
+      for (let i = aCoordinate; i <= bCoordinate; i++) {
+        ctx.lineTo(this.XC(coordinates[i].x), this.YC(coordinates[i].y));
+      }
+      ctx.lineTo(this.XC(coordinates[bCoordinate].x), this.YC(0));
+      ctx.closePath();
+      ctx.fillStyle = FILL_COLOR;
+      ctx.lineWidth = 0;
+      ctx.strokeStyle = 'white';
+      ctx.fill();
+      ctx.restore();
+    }
+
     let firstPoint = true;
-    ctx.strokeStyle = GRAPH_COLOR;
     ctx.lineWidth = 1.5 / this.virtualScale;
+
+    ctx.strokeStyle = GRAPH_COLOR;
     coordinates.forEach((c: Coordinates) => {
       if (firstPoint) {
         ctx.moveTo(this.XC(c.x), this.YC(c.y));

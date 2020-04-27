@@ -1,9 +1,10 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Solution } from '../models/Solution';
-import { TreeNode } from 'src/app/tree/tree-node/tree-node.component';
+import { TreeNode, DEFAULT_NODE } from 'src/app/tree/tree-node/tree-node.component';
 import { VariableRange, DEFAULT_RANGE } from 'src/app/input/input.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
+import { FunctionType } from '../models/Function';
 
 const DEFAULT_SOLUTION: Solution = [
   { x: -5, y: -5 },
@@ -23,7 +24,7 @@ const DEFAULT_SOLUTION: Solution = [
   providedIn: 'root',
 })
 export class SolverService {
-  solution: EventEmitter<Solution> = new EventEmitter();
+  solution: EventEmitter<{ func: TreeNode; solution: Solution }> = new EventEmitter();
 
   constructor(private http: HttpClient) {}
 
@@ -36,15 +37,11 @@ export class SolverService {
       .subscribe(
         (response: Solution) => {
           console.log(`solution`, response);
-          if (response.length) {
-            this.solution.emit(response);
-          } else {
-            this.solution.emit(DEFAULT_SOLUTION);
-          }
+          this.solution.emit({ func, solution: response });
         },
         (err) => {
           console.error(err);
-          this.solution.emit(DEFAULT_SOLUTION);
+          this.solution.emit({ func: DEFAULT_NODE, solution: DEFAULT_SOLUTION });
         },
       );
   }
