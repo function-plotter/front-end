@@ -17,8 +17,9 @@ export class GraphicComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   width = 500;
   height = 500;
-  scale = 1.0;
-  scaleMultiplier = 0.01;
+  scale = INITIAL_SCALE;
+  virtualScale = INITIAL_SCALE;
+  scaleMultiplier = 0.1;
   lastSolution: Solution;
 
   private maxX: number;
@@ -26,21 +27,8 @@ export class GraphicComponent implements OnInit {
   private minX: number;
   private minY: number;
 
-  get MaxX(): number {
-    return 10;
-  }
-
-  get MinX(): number {
-    return -10;
-  }
-
-  get MaxY(): number {
-    return (this.MaxX * this.height) / this.width;
-  }
-
-  get MinY(): number {
-    return (this.MinX * this.height) / this.width;
-  }
+  private maxScale = 5;
+  private minScale = 0.3;
 
   constructor(private solver: SolverService) {}
 
@@ -58,26 +46,26 @@ export class GraphicComponent implements OnInit {
   }
 
   downloadGraph(): void {
-    let link = document.createElement('a');
+    const link = document.createElement('a');
     link.download = GRAPH_FILENAME;
     link.href = this.canvas.nativeElement.toDataURL();
     link.click();
   }
 
   zoomIn(): void {
-    if(this.scale < INITIAL_SCALE){
-      this.scale = INITIAL_SCALE;
+    if (this.virtualScale < this.maxScale) {
+      this.virtualScale += this.scaleMultiplier;
+      this.scale = INITIAL_SCALE + this.scaleMultiplier;
+      this.zoomGraph();
     }
-    this.scale += this.scaleMultiplier;
-    this.zoomGraph();
   }
 
   zoomOut(): void {
-    if(this.scale > INITIAL_SCALE){
-      this.scale = INITIAL_SCALE;
+    if (this.virtualScale > this.minScale) {
+      this.virtualScale -= this.scaleMultiplier;
+      this.scale = INITIAL_SCALE - this.scaleMultiplier;
+      this.zoomGraph();
     }
-    this.scale -= this.scaleMultiplier;
-    this.zoomGraph();
   }
 
   private zoomGraph(): void {
@@ -88,7 +76,7 @@ export class GraphicComponent implements OnInit {
     ctx.clearRect(0, 0, this.width, this.height);
 
     ctx.save();
-    ctx.translate(-((newWidth-this.width)/2),-((newHeight-this.height)/2));
+    ctx.translate((this.width - newWidth) / 2, (this.height - newHeight) / 2);
     ctx.scale(this.scale, this.scale);
     this.createGraphic(ctx);
     this.renderFunction(ctx, this.lastSolution);
@@ -124,7 +112,7 @@ export class GraphicComponent implements OnInit {
   private createGraphic(ctx: CanvasRenderingContext2D): void {
     // +Y axis
     ctx.save();
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1 / Math.pow(this.virtualScale, 2);
     this.drawAx(ctx, 0, this.maxY);
 
     // -Y axis
@@ -163,14 +151,15 @@ export class GraphicComponent implements OnInit {
 
   private drawYTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
-    ctx.moveTo(this.XC(XC) - 5, this.YC(YC));
-    ctx.lineTo(this.XC(XC) + 5, this.YC(YC));
+    ctx.moveTo(this.XC(XC) - 5 / this.virtualScale, this.YC(YC));
+    ctx.lineTo(this.XC(XC) + 5 / this.virtualScale, this.YC(YC));
     ctx.stroke();
   }
 
   private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[]): void {
     let firstPoint = true;
     ctx.strokeStyle = GRAPH_COLOR;
+    ctx.lineWidth = 1.3 / this.virtualScale;
     coordinates.forEach((c: Coordinates) => {
       if (firstPoint) {
         ctx.moveTo(this.XC(c.x), this.YC(c.y));
@@ -185,8 +174,8 @@ export class GraphicComponent implements OnInit {
 
   private drawXTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
-    ctx.moveTo(this.XC(XC), this.YC(YC) - 5);
-    ctx.lineTo(this.XC(XC), this.YC(YC) + 5);
+    ctx.moveTo(this.XC(XC), this.YC(YC) - 5 / this.virtualScale);
+    ctx.lineTo(this.XC(XC), this.YC(YC) + 5 / this.virtualScale);
     ctx.stroke();
   }
 
@@ -195,6 +184,6 @@ export class GraphicComponent implements OnInit {
   }
 
   private YC(y: number): number {
-    return this.height - ((y - this.minY) / (this.maxY - this.MinY)) * this.height;
+    return this.height - ((y - this.minY) / (this.maxY - this.minY)) * this.height;
   }
 }
