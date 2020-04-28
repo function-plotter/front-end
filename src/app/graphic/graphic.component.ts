@@ -58,7 +58,24 @@ export class GraphicComponent implements OnInit {
     link.click();
   }
 
-  downloadCSV(): void {}
+  downloadCSV(): void {
+    let content = 'X Y';
+    this.lastSolution.forEach((s: Coordinate) => {
+      content += '\r\n';
+      content += `${s.x} ${s.y}`;
+    });
+    const blob = new Blob([content],{
+      type: 'application/*'
+    });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('visibility', 'hidden');
+    link.download = 'results.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  }
 
   zoomIn(): void {
     if (this.virtualScale < this.maxScale) {
