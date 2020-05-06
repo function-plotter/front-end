@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TreeContainerComponent } from './tree-container.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('TreeContainerComponent', () => {
   let component: TreeContainerComponent;
@@ -8,9 +9,9 @@ describe('TreeContainerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TreeContainerComponent ]
-    })
-    .compileComponents();
+      declarations: [TreeContainerComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

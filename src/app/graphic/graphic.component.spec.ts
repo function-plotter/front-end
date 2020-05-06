@@ -1,25 +1,28 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GraphicComponent } from './graphic.component';
+import { SolverService } from '../shared/services/solver.service';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('GraphicComponent', () => {
-  let component: GraphicComponent;
   let fixture: ComponentFixture<GraphicComponent>;
+  let graphic: GraphicComponent;
+  let solverSpy: jasmine.Spy;
 
   beforeEach(async(() => {
+    solverSpy = jasmine.createSpyObj('SolverService', ['solve']);
+
     TestBed.configureTestingModule({
-      declarations: [ GraphicComponent ]
-    })
-    .compileComponents();
+      declarations: [GraphicComponent],
+      providers: [{ provide: SolverService, useValue: solverSpy }],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(GraphicComponent);
+    graphic = fixture.componentInstance;
   }));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(GraphicComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(graphic).toBeTruthy();
   });
 });
