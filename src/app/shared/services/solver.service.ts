@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { FunctionType } from '../models/Function';
 
-const DEFAULT_SOLUTION: Solution = [
+export const DEFAULT_SOLUTION: Solution = [
   { x: -5, y: -5 },
   { x: -4, y: -4 },
   { x: -3, y: -3 },
