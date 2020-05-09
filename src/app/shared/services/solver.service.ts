@@ -36,11 +36,9 @@ export class SolverService {
       })
       .subscribe(
         (response: Solution) => {
-          console.log(`solution`, response);
           this.solution.emit({ func, solution: response });
         },
         (err) => {
-          console.error(err);
           this.solution.emit({ func: DEFAULT_NODE, solution: DEFAULT_SOLUTION });
         },
       );
