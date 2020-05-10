@@ -92,7 +92,8 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
   }
 
   constantChange(value: number) {
-    if (!value || value === this.node.value) {
+    console.log(value);
+    if ((value !== 0 && !value) || value === this.node.value) {
       return;
     }
     // see `argumentChange` on why Object.assign
