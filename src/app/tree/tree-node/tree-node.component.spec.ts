@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { AppModule } from 'src/app/app.module';
 import { FunctionType } from 'src/app/shared/models/Function';
-import { DEFAULT_NODE, TreeNode, TreeNodeComponent } from './tree-node.component';
+import { DEFAULT_NODE, TreeNode, TreeNodeComponent, DEFAULT_CONSTANT } from './tree-node.component';
 
 describe('TreeNodeComponent', () => {
   let component: TreeNodeComponent;
@@ -89,6 +89,24 @@ describe('TreeNodeComponent', () => {
     fixture.detectChanges();
 
     expect(component.availableTypes.sort()).toEqual(expectedAvailableTypes.sort());
+  });
+
+  it('should init form group when integral input is specified', () => {
+    const integralNode: TreeNode = {
+      type: FunctionType.INTEGRAL,
+      args: [{ type: FunctionType.VARIABLE }],
+      range: [4, 5],
+    };
+
+    component.node = integralNode;
+    fixture.detectChanges();
+
+    const expectedValue = {
+      type: FunctionType.INTEGRAL,
+      constant: DEFAULT_CONSTANT,
+      range: { a: 4, b: 5 },
+    };
+    expect(component.group.value).toEqual(expectedValue);
   });
 
   it('should change function type with default function as arguments', () => {

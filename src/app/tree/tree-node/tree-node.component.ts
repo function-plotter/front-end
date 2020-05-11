@@ -14,6 +14,8 @@ export const DEFAULT_NODE: TreeNode = {
   type: FunctionType.VARIABLE,
 };
 
+export const DEFAULT_CONSTANT = 1;
+
 @Component({
   selector: 'app-tree-node',
   templateUrl: './tree-node.component.html',
@@ -92,7 +94,6 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
   }
 
   constantChange(value: number) {
-    console.log(value);
     if ((value !== 0 && !value) || value === this.node.value) {
       return;
     }
@@ -113,11 +114,11 @@ export class TreeNodeComponent implements OnInit, OnDestroy {
     // init the basic form group
     this.group = new FormGroup({
       type: new FormControl(this.node.type),
-      constant: new FormControl(this.node.value || 1, Validators.required),
+      constant: new FormControl(this.node.value || DEFAULT_CONSTANT, Validators.required),
       range: new FormGroup(
         {
-          a: new FormControl(this.node.range ? this.node.range[0] : 1),
-          b: new FormControl(this.node.range ? this.node.range[1] : 2),
+          a: new FormControl(this.node.range ? this.node.range[0] : DEFAULT_CONSTANT),
+          b: new FormControl(this.node.range ? this.node.range[1] : DEFAULT_CONSTANT + 1),
         },
         (group: FormGroup) => {
           const a = group.controls.a.value;
