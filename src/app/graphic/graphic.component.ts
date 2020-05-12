@@ -25,14 +25,15 @@ export class GraphicComponent implements OnInit {
   scaleMultiplier = 0.1;
   lastSolution: Solution;
   lastFunc: TreeNode;
+  firstPoint: boolean;
 
-  private maxX: number;
-  private maxY: number;
-  private minX: number;
-  private minY: number;
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
 
-  private maxScale = 5;
-  private minScale = 0.3;
+  maxScale = 5;
+  minScale = 0.3;
 
   constructor(private solver: SolverService) {}
 
@@ -59,10 +60,10 @@ export class GraphicComponent implements OnInit {
   }
 
   downloadCSV(): void {
-    let content = 'X Y';
+    let content = 'X, Y';
     this.lastSolution.forEach((s: Coordinate) => {
       content += '\r\n';
-      content += `${s.x} ${s.y}`;
+      content += `${s.x}, ${s.y}`;
     });
     const blob = new Blob([content],{
       type: 'application/*'
@@ -93,7 +94,7 @@ export class GraphicComponent implements OnInit {
     }
   }
 
-  private zoomGraph(): void {
+  zoomGraph(): void {
     const newWidth = this.width * this.scale;
     const newHeight = this.height * this.scale;
     const canvas = this.canvas.nativeElement;
@@ -107,7 +108,7 @@ export class GraphicComponent implements OnInit {
     this.renderFunction(ctx, this.lastSolution);
   }
 
-  private handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[], func: TreeNode): void {
+  handleSolutionChange(ctx: CanvasRenderingContext2D, solution: Coordinate[], func: TreeNode): void {
     if (!solution.length) {
       return;
     }
@@ -135,7 +136,7 @@ export class GraphicComponent implements OnInit {
     this.renderFunction(ctx, solution);
   }
 
-  private createGraphic(ctx: CanvasRenderingContext2D): void {
+  createGraphic(ctx: CanvasRenderingContext2D): void {
     // +Y axis
     ctx.save();
     ctx.lineWidth = 1.3 / this.virtualScale;
@@ -168,21 +169,21 @@ export class GraphicComponent implements OnInit {
     ctx.restore();
   }
 
-  private drawAx(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
+  drawAx(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(0), this.YC(0));
     ctx.lineTo(this.XC(XC), this.YC(YC));
     ctx.stroke();
   }
 
-  private drawYTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
+  drawYTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(XC) - 5 / this.virtualScale, this.YC(YC));
     ctx.lineTo(this.XC(XC) + 5 / this.virtualScale, this.YC(YC));
     ctx.stroke();
   }
 
-  private renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[] = []): void {
+  renderFunction(ctx: CanvasRenderingContext2D, coordinates: Coordinate[] = []): void {
     if (!coordinates.length) {
       return;
     }
@@ -205,14 +206,14 @@ export class GraphicComponent implements OnInit {
       ctx.restore();
     }
 
-    let firstPoint = true;
+    this.firstPoint = true;
     ctx.lineWidth = 1.5 / this.virtualScale;
 
     ctx.strokeStyle = GRAPH_COLOR;
     coordinates.forEach((c: Coordinates) => {
-      if (firstPoint) {
+      if (this.firstPoint) {
         ctx.moveTo(this.XC(c.x), this.YC(c.y));
-        firstPoint = false;
+        this.firstPoint = false;
       } else {
         ctx.lineTo(this.XC(c.x), this.YC(c.y));
       }
@@ -221,18 +222,18 @@ export class GraphicComponent implements OnInit {
     ctx.strokeStyle = GUIDELINES_COLOR;
   }
 
-  private drawXTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
+  drawXTickMarks(ctx: CanvasRenderingContext2D, XC: number, YC: number): void {
     ctx.beginPath();
     ctx.moveTo(this.XC(XC), this.YC(YC) - 5 / this.virtualScale);
     ctx.lineTo(this.XC(XC), this.YC(YC) + 5 / this.virtualScale);
     ctx.stroke();
   }
 
-  private XC(x: number): number {
+  XC(x: number): number {
     return ((x - this.minX) / (this.maxX - this.minX)) * this.width;
   }
 
-  private YC(y: number): number {
+  YC(y: number): number {
     return this.height - ((y - this.minY) / (this.maxY - this.minY)) * this.height;
   }
 }
