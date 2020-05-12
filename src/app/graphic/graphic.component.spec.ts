@@ -127,7 +127,7 @@ describe('GraphicComponent', () => {
 
   it('should call createGraphic when solution has value', () => {
     spyOn(component, 'createGraphic');
-    const solution = [{ x: 2, y: 3 }];
+    const solution = [{ x: 2, y: 3 }, {x: 4, y:5}, {x:1, y: 2}];
     const func = { type: FunctionType.ADDITION };
     const ctx = component.canvas.nativeElement.getContext('2d');
     component.handleSolutionChange(ctx, solution, func);
@@ -150,7 +150,7 @@ describe('GraphicComponent', () => {
     expect(component.drawAx).toHaveBeenCalled();
   });
 
-  it('should call drawAx when createGraphic is called', () => {
+  it('should call drawXTickMarks when createGraphic is called', () => {
     spyOn(component, 'drawXTickMarks');
     component.maxX = 3;
     const ctx = component.canvas.nativeElement.getContext('2d');
@@ -158,12 +158,28 @@ describe('GraphicComponent', () => {
     expect(component.drawXTickMarks).toHaveBeenCalled();
   });
 
-  it('should call drawAx when createGraphic is called', () => {
+  it('should call drawYTickMarks when createGraphic is called', () => {
     spyOn(component, 'drawYTickMarks');
     component.maxY = 3;
     const ctx = component.canvas.nativeElement.getContext('2d');
     component.createGraphic(ctx);
     expect(component.drawYTickMarks).toHaveBeenCalled();
+  });
+
+  it('should call drawYTickMarks with minY when createGraphic is called', () => {
+    spyOn(component, 'drawYTickMarks');
+    component.minY = 0;
+    const ctx = component.canvas.nativeElement.getContext('2d');
+    component.createGraphic(ctx);
+    expect(component.drawYTickMarks).toHaveBeenCalled();
+  });
+
+  it('should call drawYTickMarks with minY when createGraphic is called', () => {
+    spyOn(component, 'drawXTickMarks');
+    component.minX = 0;
+    const ctx = component.canvas.nativeElement.getContext('2d');
+    component.createGraphic(ctx);
+    expect(component.drawXTickMarks).toHaveBeenCalled();
   });
 
   it('should call XC when drawAx is called', () => {
